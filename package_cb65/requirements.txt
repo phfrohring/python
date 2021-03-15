@@ -1,4 +1,4 @@
 # -e https://github.com/foo/bar.git#egg=bar
 
--e /home/phf/root/store/5e534dc9-cc84-40cb-826f-fb5d9cde4900/program_9ef5
+-e git+https://github.com/phfrohring/python.git#egg=program_9ef5&subdirectory=program_9ef5
 -e .
