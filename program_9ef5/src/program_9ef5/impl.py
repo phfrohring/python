@@ -98,7 +98,7 @@ class Program:
         return [inst_by_key[key] for key in ordered_keys]
 
     def execute(self, context={}):
-        insts = self._ordered_insts()
+        insts = self.ordered_insts()
         return pipe(context, *insts)
 
 
