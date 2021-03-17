@@ -26,14 +26,17 @@ Solution
 
 # Imports
 
-from inspect import signature
-from toolz.functoolz import pipe
-import networkx as nx
 import logging
+from inspect import signature
+
+import networkx as nx
+from toolz.functoolz import pipe
+
 logger = logging.getLogger(__name__)
 
 
 # Implementation
+
 
 def compute_seq(digraph):
     roots = [u for u in digraph if digraph.in_degree(u) == 0]
@@ -41,31 +44,27 @@ def compute_seq(digraph):
     def rec(u):
         max_lvl = -1
         for v in digraph[u]:
-            lvl = digraph.nodes[v]['lvl']
+            lvl = digraph.nodes[v]["lvl"]
             if lvl is None:
                 lvl = rec(v)
 
             if max_lvl < lvl:
                 max_lvl = lvl
 
+        digraph.nodes[u]["lvl"] = max_lvl + 1
 
-        digraph.nodes[u]['lvl'] =  max_lvl + 1
-
-        return digraph.nodes[u]['lvl']
+        return digraph.nodes[u]["lvl"]
 
     for root in roots:
         rec(root)
 
-    sorted_nodes = sorted(digraph.nodes(data=True), key = lambda n: n[1]['lvl'])
+    sorted_nodes = sorted(digraph.nodes(data=True), key=lambda n: n[1]["lvl"])
 
-    return [name for (name,xxx) in sorted_nodes]
+    return [name for (name, xxx) in sorted_nodes]
 
-
-
-# Interface
 
 class Program:
-    def __init__(self, inst = set()):
+    def __init__(self, inst=set()):
         self._inst = inst
 
     def inst_add(inst):
@@ -76,7 +75,9 @@ class Program:
             _inst = {inst}
 
         if not isinstance(_inst, set):
-            raise AssertionError(f'expected: inst is an Instruction or set(Instruction). actual: {inst}')
+            raise AssertionError(
+                f"expected: inst is an Instruction or set(Instruction). actual: {inst}"
+            )
 
         self._inst = self._inst | _inst
 
@@ -121,7 +122,6 @@ class Instruction:
         self._result_id = params[-1]
         self._set.add(self)
 
-
     def deps(self):
         return self._deps
 
@@ -138,7 +138,7 @@ class Instruction:
         return context
 
     def __str__(self):
-        msg = f'''{type(self).__name__} rule: {self.rule()} key: {self.key()} deps: {self.deps()}'''
+        msg = f"""{type(self).__name__} rule: {self.rule()} key: {self.key()} deps: {self.deps()}"""
         return msg
 
     def __doc__(self):
@@ -148,7 +148,4 @@ class Instruction:
         return hash(self.key())
 
     def __eq__(self, other):
-        return (
-            type(self) == type(other) and
-            hash(self) == hash(other)
-        )
+        return type(self) == type(other) and hash(self) == hash(other)

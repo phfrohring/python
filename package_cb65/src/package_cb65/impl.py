@@ -25,18 +25,20 @@ Solution
 # Imports
 
 import argparse
-import os
 import logging
-from uuid import uuid4 as uuid
-from pathlib import Path
-import re
+import os
 import pprint
-from program_9ef5 import Program, Instruction
+import re
+from pathlib import Path
+from uuid import uuid4 as uuid
+
+from program_9ef5 import Instruction, Program
+
 logger = logging.getLogger(__name__)
 
 
-
 # Implementation
+
 
 def mkdir(path):
     path.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -44,7 +46,7 @@ def mkdir(path):
 
 
 def mkfile(path, content):
-    with path.open(mode='w', encoding='utf-8') as a_file:
+    with path.open(mode="w", encoding="utf-8") as a_file:
         a_file.write(content)
         path.chmod(0o600)
 
@@ -53,11 +55,12 @@ def mkfile(path, content):
 
 @Instruction
 def get_deps_path(deps_path):
-    return Path(os.environ['deps_path'])
+    return Path(os.environ["deps_path"])
+
 
 @Instruction
 def get_name(name):
-    parser = argparse.ArgumentParser(description='Install user defined packages.')
+    parser = argparse.ArgumentParser(description="Install user defined packages.")
     arg_name = "component_name"
     parser.add_argument(
         arg_name,
@@ -65,9 +68,11 @@ def get_name(name):
     )
     return vars(parser.parse_args())[arg_name]
 
+
 @Instruction
 def get_id(id):
-    return str(uuid()).split('-')[1]
+    return str(uuid()).split("-")[1]
+
 
 @Instruction
 def get_identifier(name, id, identifier):
@@ -81,20 +86,22 @@ def build_container(deps_path, identifier, container):
 
 @Instruction
 def build_src(container, src):
-    return mkdir(container / 'src')
+    return mkdir(container / "src")
+
 
 @Instruction
 def build_pkg(src, identifier, pkg):
     return mkdir(src / identifier)
 
+
 @Instruction
 def build_test(container, test):
-    return mkdir(container / 'test')
+    return mkdir(container / "test")
 
 
 @Instruction
 def build_impl(identifier, pkg, impl):
-    path = pkg / 'impl.py'
+    path = pkg / "impl.py"
     content = f'''
 # -*- coding: utf-8 -*-
 
@@ -143,14 +150,12 @@ def something():
     return somethingelse()
 '''
 
-    return mkfile(path,content)
-
-
+    return mkfile(path, content)
 
 
 @Instruction
 def build_init(pkg, init):
-    path = pkg / '__init__.py'
+    path = pkg / "__init__.py"
     content = f'''"""
 # -*- coding: utf-8 -*-
 
@@ -168,8 +173,8 @@ from .impl import something
 
 @Instruction
 def build_main(identifier, pkg, main):
-    path = pkg / '__main__.py'
-    content = f'''
+    path = pkg / "__main__.py"
+    content = f"""
 # -*- coding: utf-8 -*-
 
 
@@ -185,16 +190,15 @@ def main():
 
 if __name__ == "__main__":
     main()
-'''
+"""
 
     return mkfile(path, content)
 
 
-
 @Instruction
 def build_pyproject(container, pyproject):
-    path = container / 'pyproject.toml'
-    content = f'''[build-system]
+    path = container / "pyproject.toml"
+    content = f"""[build-system]
 # gives a list of packages that are needed to build your package. Listing something
 # here will only make it available during the build, not after it is installed.
 requires = [
@@ -202,26 +206,23 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
-'''
+"""
     return mkfile(path, content)
-
 
 
 @Instruction
 def build_requirements(container, requirements):
-    path = container / 'requirements.txt'
-    content = f'''# https://caremad.io/posts/2013/07/setup-vs-requirement/
+    path = container / "requirements.txt"
+    content = f"""# https://caremad.io/posts/2013/07/setup-vs-requirement/
 # -e https://github.com/foo/bar.git#egg=bar
 -e .
-'''
+"""
     return mkfile(path, content)
-
-
 
 
 @Instruction
 def build_impl_test(identifier, test, impl_test):
-    path = test / 'impl_test.py'
+    path = test / "impl_test.py"
     content = f'''# -*- coding: utf-8 -*-
 
 # Imports
@@ -241,23 +242,22 @@ def test_impl():
 
 @Instruction
 def build_readme(container, readme):
-    path = container / 'README'
-    content = 'README'
+    path = container / "README"
+    content = "README"
     return mkfile(path, content)
 
 
 @Instruction
 def build_license(container, license):
-    path = container / 'LICENSE'
-    content = 'https://www.mozilla.org/en-US/MPL/2.0/'
+    path = container / "LICENSE"
+    content = "https://www.mozilla.org/en-US/MPL/2.0/"
     return mkfile(path, content)
-
 
 
 @Instruction
 def build_setup_cfg(container, identifier, setupcfg):
-    path = container / 'setup.cfg'
-    content = f'''[metadata]
+    path = container / "setup.cfg"
+    content = f"""[metadata]
 name = {identifier}
 version = 0.0.1
 author = Pierre-Henry Fröhring
@@ -286,30 +286,34 @@ where=src
 [options.entry_points]
 console_scripts =
     {identifier} = {identifier}.__main__:main
-'''
+"""
 
     return mkfile(path, content)
 
 
 @Instruction
 def build_setup_py(container, identifier, setuppy):
-    path = container / 'setup.py'
-    content = f'''import setuptools
+    path = container / "setup.py"
+    content = f"""import setuptools
 setuptools.setup()
-'''
+"""
 
     return mkfile(path, content)
+
 
 program = Program(Instruction.all())
 
 # Interface
 
+
 def build():
     """docstring"""
 
     # Context of execution
-    debug = os.environ.get('debug') == 'true'
+    debug = os.environ.get("debug") == "true"
     if debug:
-        logging.basicConfig(level=logging.DEBUG, force=True, format='%(levelname)s: %(message)s')
+        logging.basicConfig(
+            level=logging.DEBUG, force=True, format="%(levelname)s: %(message)s"
+        )
 
     program.execute()

@@ -2,11 +2,10 @@
 
 # Imports
 
-from program_9ef5 import  Program, Instruction
-
-
+from program_9ef5 import Instruction, Program
 
 # Implementation
+
 
 def test_impl():
     """docstring"""
@@ -14,14 +13,14 @@ def test_impl():
 
     @Instruction
     def hello(hello):
-        return 'hello'
+        return "hello"
 
     @Instruction
     def world(world):
-        return 'world'
+        return "world"
 
     @Instruction
     def concat(hello, world, hello_world):
-        return f'{hello} {world}'
+        return f"{hello} {world}"
 
-    assert Program(Instruction.all()).execute() == 'hello world'
+    assert Program(Instruction.all()).execute() == "hello world"
