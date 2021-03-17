@@ -90,13 +90,14 @@ class Program:
             key = inst.key()
             digraph.add_node(key, lvl=None)
             for dep in inst.deps():
+                digraph.add_node(dep, lvl=None)
                 digraph.add_edge(key, dep)
 
         ordered_keys = compute_seq(digraph)
 
         inst_by_key = {inst.key(): inst for inst in self._inst}
 
-        return [inst_by_key[key] for key in ordered_keys]
+        return [inst_by_key[key] for key in ordered_keys if key in inst_by_key]
 
     def execute(self, context={}):
         insts = self.ordered_insts()
