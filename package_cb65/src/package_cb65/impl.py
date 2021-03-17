@@ -24,29 +24,26 @@ Solution
 
 # Imports
 
-import argparse as _argparse
-import os as _os
-import logging as _logging
-import subprocess as _sp
-from toolz.functoolz import pipe as _pipe
-from uuid import uuid4 as _uuid
-from pathlib import Path as _Path
-import re as _re
-import pprint as _pprint
-_pf = _pprint.PrettyPrinter(indent=4).pformat
+import argparse
+import os
+import logging
+from uuid import uuid4 as uuid
+from pathlib import Path
+import re
+import pprint
 from program_9ef5 import Program, Instruction
-_logger = _logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 
 # Implementation
 
-def _mkdir(path):
+def mkdir(path):
     path.mkdir(mode=0o700, parents=True, exist_ok=False)
     return path
 
 
-def _mkfile(path, content):
+def mkfile(path, content):
     with path.open(mode='w', encoding='utf-8') as a_file:
         a_file.write(content)
         path.chmod(0o600)
@@ -55,12 +52,12 @@ def _mkfile(path, content):
 
 
 @Instruction
-def _get_deps_path(deps_path):
-    return _Path(_os.environ['deps_path'])
+def get_deps_path(deps_path):
+    return Path(os.environ['deps_path'])
 
 @Instruction
-def _get_name(name):
-    parser = _argparse.ArgumentParser(description='Install user defined packages.')
+def get_name(name):
+    parser = argparse.ArgumentParser(description='Install user defined packages.')
     arg_name = "component_name"
     parser.add_argument(
         arg_name,
@@ -69,38 +66,41 @@ def _get_name(name):
     return vars(parser.parse_args())[arg_name]
 
 @Instruction
-def _get_id(id):
-    return str(_uuid()).split('-')[1]
+def get_id(id):
+    return str(uuid()).split('-')[1]
 
 @Instruction
-def _get_identifier(name, id, identifier):
+def get_identifier(name, id, identifier):
     return f"{name}_{id}"
 
 
 @Instruction
-def _build_container(deps_path, identifier, container):
-    return _mkdir(deps_path / identifier)
+def build_container(deps_path, identifier, container):
+    return mkdir(deps_path / identifier)
 
 
 @Instruction
-def _build_src(container, src):
-    return _mkdir(container / 'src')
+def build_src(container, src):
+    return mkdir(container / 'src')
 
 @Instruction
-def _build_pkg(src, identifier, pkg):
-    return _mkdir(src / identifier)
+def build_pkg(src, identifier, pkg):
+    return mkdir(src / identifier)
 
 @Instruction
-def _build_test(container, test):
-    return _mkdir(container / 'test')
+def build_test(container, test):
+    return mkdir(container / 'test')
 
 
 @Instruction
-def _build_impl(identifier, pkg, impl):
+def build_impl(identifier, pkg, impl):
     path = pkg / 'impl.py'
-    content = f'''"""
+    content = f'''
+# -*- coding: utf-8 -*-
+
+"""
 {identifier}
-{_re.sub('.', '=', identifier)}
+{re.sub('.', '=', identifier)}
 
 Problem
 -------
@@ -124,46 +124,50 @@ Solution
 
 # Imports
 
-import logging as _logging
-_logger = _logging.getLogger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 
 # Implementation
 
-def _somethingelse():
+def somethingelse():
     """docstring"""
     return 1
 
 
 # Interface
+# Exported through the __init__.py file
 
 def something():
     """docstring"""
-    return _somethingelse()
+    return somethingelse()
 '''
 
-    return _mkfile(path,content)
+    return mkfile(path,content)
 
 
 
 
 @Instruction
-def _build_init(pkg, init):
+def build_init(pkg, init):
     path = pkg / '__init__.py'
     content = f'''"""
+# -*- coding: utf-8 -*-
+
 __init__
 ========
 """
 __version__ = "1.0.0"
 
-from .impl import *
+# Defines what is exposed when importing this package.
+from .impl import something
 '''
 
-    return _mkfile(path, content)
+    return mkfile(path, content)
 
 
 @Instruction
-def _build_main(identifier, pkg, main):
+def build_main(identifier, pkg, main):
     path = pkg / '__main__.py'
     content = f'''
 # -*- coding: utf-8 -*-
@@ -183,12 +187,12 @@ if __name__ == "__main__":
     main()
 '''
 
-    return _mkfile(path, content)
+    return mkfile(path, content)
 
 
 
 @Instruction
-def _build_pyproject(container, pyproject):
+def build_pyproject(container, pyproject):
     path = container / 'pyproject.toml'
     content = f'''[build-system]
 # gives a list of packages that are needed to build your package. Listing something
@@ -199,24 +203,24 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 '''
-    return _mkfile(path, content)
+    return mkfile(path, content)
 
 
 
 @Instruction
-def _build_requirements(container, requirements):
+def build_requirements(container, requirements):
     path = container / 'requirements.txt'
     content = f'''# https://caremad.io/posts/2013/07/setup-vs-requirement/
 # -e https://github.com/foo/bar.git#egg=bar
 -e .
 '''
-    return _mkfile(path, content)
+    return mkfile(path, content)
 
 
 
 
 @Instruction
-def _build_impl_test(identifier, test, impl_test):
+def build_impl_test(identifier, test, impl_test):
     path = test / 'impl_test.py'
     content = f'''# -*- coding: utf-8 -*-
 
@@ -232,26 +236,26 @@ def test_impl():
     assert something() == 1
 
 '''
-    return _mkfile(path, content)
+    return mkfile(path, content)
 
 
 @Instruction
-def _build_readme(container, readme):
+def build_readme(container, readme):
     path = container / 'README'
     content = 'README'
-    return _mkfile(path, content)
+    return mkfile(path, content)
 
 
 @Instruction
-def _build_license(container, license):
+def build_license(container, license):
     path = container / 'LICENSE'
     content = 'https://www.mozilla.org/en-US/MPL/2.0/'
-    return _mkfile(path, content)
+    return mkfile(path, content)
 
 
 
 @Instruction
-def _build_setup_cfg(container, identifier, setupcfg):
+def build_setup_cfg(container, identifier, setupcfg):
     path = container / 'setup.cfg'
     content = f'''[metadata]
 name = {identifier}
@@ -259,7 +263,7 @@ version = 0.0.1
 author = Pierre-Henry Fröhring
 author_email = contact@phfrohring.com
 description = A small example package
-long_description = _mkfile: README
+long_description = mkfile: README
 long_description_content_type = text/x-rst
 url = https://github.com/phfrohring/python
 project_urls =
@@ -284,27 +288,28 @@ console_scripts =
     {identifier} = {identifier}.__main__:main
 '''
 
-    return _mkfile(path, content)
+    return mkfile(path, content)
 
 
 @Instruction
-def _build_setup_py(container, identifier, setuppy):
+def build_setup_py(container, identifier, setuppy):
     path = container / 'setup.py'
     content = f'''import setuptools
 setuptools.setup()
 '''
 
-    return _mkfile(path, content)
+    return mkfile(path, content)
 
-_program = Program(Instruction.all())
+program = Program(Instruction.all())
 
 # Interface
 
 def build():
     """docstring"""
-        # Context of execution
-    debug = _os.environ.get('debug') == 'true'
-    if debug:
-        _logging.basicConfig(level=_logging.DEBUG, force=True, format='%(levelname)s: %(message)s')
 
-    _program.execute()
+    # Context of execution
+    debug = os.environ.get('debug') == 'true'
+    if debug:
+        logging.basicConfig(level=logging.DEBUG, force=True, format='%(levelname)s: %(message)s')
+
+    program.execute()

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 program_9ef5
 ============
@@ -25,15 +27,15 @@ Solution
 # Imports
 
 from inspect import signature
-from toolz.functoolz import pipe as _pipe
-import networkx as _nx
-import logging as _logging
-_logger = _logging.getLogger(__name__)
+from toolz.functoolz import pipe
+import networkx as nx
+import logging
+logger = logging.getLogger(__name__)
 
 
 # Implementation
 
-def _compute_seq(digraph):
+def compute_seq(digraph):
     roots = [u for u in digraph if digraph.in_degree(u) == 0]
 
     def rec(u):
@@ -80,8 +82,8 @@ class Program:
 
         return self
 
-    def _ordered_insts(self):
-        digraph = _nx.DiGraph()
+    def ordered_insts(self):
+        digraph = nx.DiGraph()
 
         for inst in self._inst:
             key = inst.key()
@@ -89,7 +91,7 @@ class Program:
             for dep in inst.deps():
                 digraph.add_edge(key, dep)
 
-        ordered_keys = _compute_seq(digraph)
+        ordered_keys = compute_seq(digraph)
 
         inst_by_key = {inst.key(): inst for inst in self._inst}
 
@@ -97,7 +99,7 @@ class Program:
 
     def execute(self, context={}):
         insts = self._ordered_insts()
-        return _pipe(context, *insts)
+        return pipe(context, *insts)
 
 
 class Instruction:
@@ -131,7 +133,7 @@ class Instruction:
 
     def __call__(self, context):
         args = tuple(context[key] for key in self._deps) + (None,)
-        _logger.debug(self.__str__())
+        logger.debug(self.__str__())
         context[self.key()] = self._func(*args)
         return context
 
