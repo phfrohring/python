@@ -1,3 +1,0 @@
-# https://caremad.io/posts/2013/07/setup-vs-requirement/
-# -e https://github.com/foo/bar.git#egg=bar
--e .
