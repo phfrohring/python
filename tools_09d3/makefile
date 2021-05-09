@@ -1,5 +1,5 @@
 # Interface.
-.PHONY: help test dev doc clean
+.PHONY: help test dev doc publish clean
 .DEFAULT_GOAL := help
 
 # Shell commands are interpreted by Bash.
