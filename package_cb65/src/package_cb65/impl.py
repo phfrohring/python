@@ -377,6 +377,8 @@ dev =
   isort
   sphinx-rtd-theme
   numpydoc
+  build
+  twine
 
 [options.entry_points]
 console_scripts =
@@ -466,6 +468,10 @@ doc: $(build_doc) ## Build documentation.
 format: ## Format code.
 	@echo "Target: $@"
 	@black $(set_src) $(set_test)
+
+publish: ## Publish to PyPi.
+	@echo "Target: $@"
+	@python -m build; twine upload $(root_dist)/*
 
 clean: ## Clean built targets.
 	rm -rf $(set_log)/*

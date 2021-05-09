@@ -55,6 +55,9 @@ set_log := logs
 test_log := $(set_log)/test.log
 dev_log := $(set_log)/dev.log
 
+# Directory of docs.
+root_dist := dist
+
 help:  ## Print help.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -70,6 +73,10 @@ dev: $(dev_log) ## Install a the package in editable mode.
 doc: $(build_doc) ## Build documentation.
 	@echo "Target: $@"
 	@$(navigator_web) $(build_doc)/html/index.html
+
+publish: ## Publish to PyPi.
+	@echo "Target: $@"
+	@python -m build; twine upload $(root_dist)/*
 
 clean: ## Remove built files.
 	rm -rf $(set_log)/*
