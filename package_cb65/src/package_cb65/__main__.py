@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-# Import
-
 from package_cb65 import build
 
 
